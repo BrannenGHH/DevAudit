@@ -412,7 +412,7 @@ namespace DevAudit.AuditLibrary
                     Task t = Task.Factory.StartNew(async () =>
                     {
                         Dictionary<IPackage, List<IArtifact>> artifacts = await ds.SearchArtifacts(this.Packages.ToList());
-                        lock (artifacts_lock)
+                        lock (ArtifactsLock)
                         {
                             foreach (KeyValuePair<IPackage, List<IArtifact>> kv in artifacts)
                             {

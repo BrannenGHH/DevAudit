@@ -175,11 +175,11 @@ namespace DevAudit.AuditLibrary
             }
         }
 
-        public override bool IsVulnerabilityVersionInPackageVersionRange(string vulnerability_version, string package_version)
+        public override bool IsVulnerabilityVersionInPackageVersionRange(string vulnerabilityVersion, string packageVersion)
         {
             if (this.PackageSourceInitialized)
             {
-                return this.NugetPackageSource.IsVulnerabilityVersionInPackageVersionRange(vulnerability_version, package_version);
+                return this.NugetPackageSource.IsVulnerabilityVersionInPackageVersionRange(vulnerabilityVersion, packageVersion);
             }
             else throw new InvalidOperationException("The package source is not intialized.");
         }

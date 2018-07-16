@@ -182,10 +182,10 @@ namespace DevAudit.AuditLibrary
             return (configuration_rule_version == server_version) || configuration_rule_version == ">0";
         }
 
-        public override bool IsVulnerabilityVersionInPackageVersionRange(string vulnerability_version, string package_version)
+        public override bool IsVulnerabilityVersionInPackageVersionRange(string vulnerabilityVersion, string packageVersion)
         {
             string message = "";
-            bool r = Drupal.RangeIntersect(vulnerability_version, package_version, out message);
+            bool r = Drupal.RangeIntersect(vulnerabilityVersion, packageVersion, out message);
             if (!r && !string.IsNullOrEmpty(message))
             {
                 throw new Exception(message);

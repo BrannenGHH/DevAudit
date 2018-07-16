@@ -117,9 +117,9 @@ namespace DevAudit.AuditLibrary
             return this.GetModules()["nginx"];
         }
 
-        public override bool IsVulnerabilityVersionInPackageVersionRange(string vulnerability_version, string package_version)
+        public override bool IsVulnerabilityVersionInPackageVersionRange(string vulnerabilityVersion, string packageVersion)
         {
-            return vulnerability_version == package_version;
+            return vulnerabilityVersion == packageVersion;
         }
         #endregion
     }

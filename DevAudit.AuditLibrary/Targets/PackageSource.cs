@@ -17,15 +17,17 @@ namespace DevAudit.AuditLibrary
     public abstract class PackageSource : AuditTarget
     {
         #region Constructors
-        public PackageSource(Dictionary<string, object> package_source_options, EventHandler<EnvironmentEventArgs> message_handler) : base(package_source_options, message_handler)
+        public PackageSource(Dictionary<string, object> packageSourceOptions,
+                             EventHandler<EnvironmentEventArgs> messageHandler)
+            : base(packageSourceOptions, messageHandler)
         {
-            this.PackageSourceOptions = this.AuditOptions;
+            PackageSourceOptions = AuditOptions;
             if (this.PackageSourceOptions.ContainsKey("File"))
             {
                 this.PackageManagerConfigurationFile = (string)this.PackageSourceOptions["File"];
                 if (!this.AuditEnvironment.FileExists(this.PackageManagerConfigurationFile))
                 {
-                    throw new ArgumentException("Could not find the file " + this.PackageManagerConfigurationFile + ".", "package_source_options");
+                    throw new ArgumentException("Could not find the file " + this.PackageManagerConfigurationFile + ".", "packageSourceOptions");
                 }
             }
             else if (!this.PackageSourceOptions.ContainsKey("File") && this.DefaultPackageManagerConfigurationFile != string.Empty)
@@ -78,8 +80,8 @@ namespace DevAudit.AuditLibrary
                 }
             }
 
-            string[] ossi_pms = { "bower", "composer", "choco", "msi", "nuget", "oneget", "yarn" };
-            if (this.DataSources.Count == 0 && ossi_pms.Contains(this.PackageManagerId))
+            string[] ossiPms = { "bower", "composer", "choco", "msi", "nuget", "oneget", "yarn" };
+            if (this.DataSources.Count == 0 && ossiPms.Contains(this.PackageManagerId))
             {
                 this.HostEnvironment.Info("Using OSS Index as default package vulnerabilities data source for {0} package source.", this.PackageManagerLabel);
                 this.DataSources.Add(new OSSIndexDataSource(this, this.DataSourceOptions));
@@ -95,7 +97,7 @@ namespace DevAudit.AuditLibrary
 
         #region Abstract methods
         public abstract IEnumerable<Package> GetPackages(params string[] o);
-        public abstract bool IsVulnerabilityVersionInPackageVersionRange(string vulnerability_version, string package_version);
+        public abstract bool IsVulnerabilityVersionInPackageVersionRange(string vulnerabilityVersion, string packageVersion);
         #endregion
 
         #region Properties
@@ -137,7 +139,7 @@ namespace DevAudit.AuditLibrary
         #region Methods
         public virtual AuditResult Audit(CancellationToken ct)
         {
-            CallerInformation here = this.AuditEnvironment.Here();
+            CallerInformation here = AuditEnvironment.Here();
             this.GetPackagesTask(ct);
             this.GetVulnerableCredentialStorageTask(ct);
             try
@@ -245,7 +247,7 @@ namespace DevAudit.AuditLibrary
                     Task t = Task.Factory.StartNew(async () =>
                     {
                         Dictionary<IPackage, List<IArtifact>> artifacts = await ds.SearchArtifacts(this.Packages.ToList());
-                        lock (artifacts_lock)
+                        lock (ArtifactsLock)
                         {
                             foreach (KeyValuePair<IPackage, List<IArtifact>> kv in artifacts)
                             {
@@ -268,8 +270,8 @@ namespace DevAudit.AuditLibrary
                 return this.VulnerabilitiesTask;
             }
             List<Task> tasks = new List<Task>();
-            IEnumerable<IDataSource> eligible_datasources = this.DataSources.Where(d => d.Initialised && d.IsEligibleForTarget(this));
-            if (eligible_datasources.Count() == 0)
+            IEnumerable<IDataSource> eligibleDatasources = this.DataSources.Where(d => d.Initialised && d.IsEligibleForTarget(this));
+            if (eligibleDatasources.Any())
             {
                 this.HostEnvironment.Warning("No eligible initialised vulnerabilities data sources found for audit target {0}.", this.PackageManagerLabel);
                 this.VulnerabilitiesTask = Task.CompletedTask;
@@ -277,14 +279,14 @@ namespace DevAudit.AuditLibrary
             }
             else
             {
-                foreach (IDataSource ds in eligible_datasources)
+                foreach (IDataSource ds in eligibleDatasources)
                 {
                     Task t = Task.Factory.StartNew(async () =>
                     {
                         Dictionary<IPackage, List<IVulnerability>> vulnerabilities = await ds.SearchVulnerabilities(this.Packages.ToList());
                         if (vulnerabilities != null)
                         {
-                            lock (vulnerabilities_lock)
+                            lock (VulnerabilitiesLock)
                             {
                                 foreach (KeyValuePair<IPackage, List<IVulnerability>> kv in vulnerabilities)
                                 {
@@ -318,15 +320,15 @@ namespace DevAudit.AuditLibrary
             }
             else
             {
-                IVulnerableCredentialStore credentials_store = this as IVulnerableCredentialStore;
+                IVulnerableCredentialStore credentialsStore = this as IVulnerableCredentialStore;
                 this.AuditEnvironment.Status("Scanning for vulnerable credential storage candidates");
-                return this.VulnerableCredentialStorageTask = Task.Run(() => credentials_store.GetVulnerableCredentialStorage());
+                return this.VulnerableCredentialStorageTask = Task.Run(() => credentialsStore.GetVulnerableCredentialStorage());
             }
 
         }
         protected IEnumerable<Package> FilterPackagesUsingProfile()
         {
-            if (this.Packages == null || this.Packages.Count() == 0 || this.AuditProfile == null || this.AuditProfile.Rules == null)
+            if (Packages == null || !Packages.Any() || AuditProfile == null || AuditProfile.Rules == null)
             {
                 return this.Packages;
             }
@@ -440,8 +442,8 @@ namespace DevAudit.AuditLibrary
         #endregion
 
         #region Fields
-        public object vulnerabilities_lock = new object();
-        public object artifacts_lock = new object();
+        public object VulnerabilitiesLock = new object();
+        public object ArtifactsLock = new object();
         #endregion
 
     }

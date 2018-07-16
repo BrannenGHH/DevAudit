@@ -21,6 +21,9 @@ namespace DevAudit.CommandLine
         [VerbOption("msi", HelpText = "Audit MSI packages on Windows. Packages are scanned from the registry.")]
         public Options AuditMsi { get; set; }
 
+        [VerbOption("npm", HelpText =  "Audit NPM packages. Use the --file option to specify a particular package.json file otherwise the one in the current directory will be used.")]
+        public Options AuditNpm { get; set; }
+
         [VerbOption("choco", HelpText = "Audit Chocolatey packages on Windows. Packages are scanned from C:\\ProgramData\\chocolatey.")]
         public Options AuditChocolatey { get; set; }
 
@@ -214,6 +217,12 @@ namespace DevAudit.CommandLine
 
         //[Option("with-libio", Required = false, HelpText = "Use artifact data from the libraries.io API.")]
         public bool WithLibIO { get; set; }
+
+        [Option("package-name", Required = false, HelpText = "Audit a specific package name")]
+        public string PackageName { get; set; }
+        
+        [Option("package-version", Required = false, HelpText = "Audit a specific package version")]
+        public string PackageVersion { get; set; }
 
         public static Dictionary<string, object> Parse(string o)
         {

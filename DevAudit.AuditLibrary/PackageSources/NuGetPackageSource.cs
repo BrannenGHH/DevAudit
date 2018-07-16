@@ -12,33 +12,45 @@ namespace DevAudit.AuditLibrary
 {
     public class NuGetPackageSource : PackageSource
     {
-        public override string PackageManagerId { get { return "nuget"; } }
+        public override string PackageManagerId => "nuget";
 
-        public override string PackageManagerLabel { get { return "NuGet"; } }
+        public override string PackageManagerLabel => "NuGet";
 
-        public override string DefaultPackageManagerConfigurationFile { get { return "packages.config"; } }
+        public override string DefaultPackageManagerConfigurationFile => "packages.config";
 
-        public NuGetPackageSource(Dictionary<string, object> package_source_options, EventHandler<EnvironmentEventArgs> message_handler = null) : base(package_source_options, message_handler)
+        public NuGetPackageSource(Dictionary<string, object> packageSourceOptions, 
+                                  EventHandler<EnvironmentEventArgs> messageHandler = null) 
+            : base(packageSourceOptions, messageHandler)
         {
               
         }
 
+        /// <summary>
+        /// Reads the packages.config file and returns 
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns></returns>
         public override IEnumerable<Package> GetPackages(params string[] o) ////Get NuGet packages from reading packages.config
         {
             try
             {
-                AuditFileInfo config_file = this.AuditEnvironment.ConstructFile(this.PackageManagerConfigurationFile);
-                string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
-                string xml = config_file.ReadAsText();
-                if (xml.StartsWith(_byteOrderMarkUtf8, StringComparison.Ordinal))
+                // Load config file
+                AuditFileInfo configFile = this.AuditEnvironment.ConstructFile(this.PackageManagerConfigurationFile);
+                string byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
+                string xml = configFile.ReadAsText();
+
+                // Remove BOM from beginning of string if it exsists exsists
+                if (xml.StartsWith(byteOrderMarkUtf8, StringComparison.Ordinal))
                 {
-                    var lastIndexOfUtf8 = _byteOrderMarkUtf8.Length;
+                    int lastIndexOfUtf8 = byteOrderMarkUtf8.Length;
                     xml = xml.Remove(0, lastIndexOfUtf8);
                 }
+
+                // Parse XML file
                 XElement root = XElement.Parse(xml);
                 IEnumerable<Package> packages =
-                    from el in root.Elements("package")
-                    select new Package("nuget", el.Attribute("id").Value, el.Attribute("version").Value, "");
+                    from package in root.Elements("package")
+                    select new Package("nuget", package.Attribute("id").Value, package.Attribute("version").Value);
                 return packages;
             }
             catch (XmlException e)
@@ -53,15 +65,15 @@ namespace DevAudit.AuditLibrary
 
         }
 
-        public override bool IsVulnerabilityVersionInPackageVersionRange(string vulnerability_version, string package_version)
+        public override bool IsVulnerabilityVersionInPackageVersionRange(string vulnerabilityVersion, string packageVersion)
         {
-            string message = "";
-            bool r = NuGetv2.RangeIntersect(vulnerability_version, package_version, out message);
+            string message;
+            bool r = NuGetv2.RangeIntersect(vulnerabilityVersion, packageVersion, out message);
             if (!r && !string.IsNullOrEmpty(message))
             {
                 throw new Exception(message);
             }
-            else return r;           
+            return r;           
         }
     }
 }

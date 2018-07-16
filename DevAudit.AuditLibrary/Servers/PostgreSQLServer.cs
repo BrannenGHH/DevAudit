@@ -181,10 +181,10 @@ namespace DevAudit.AuditLibrary
             }
         }
 
-        public override bool IsVulnerabilityVersionInPackageVersionRange(string vulnerability_version, string package_version)
+        public override bool IsVulnerabilityVersionInPackageVersionRange(string vulnerabilityVersion, string packageVersion)
         {
             string message = "";
-            bool r = NuGetv2.RangeIntersect(vulnerability_version, package_version, out message);
+            bool r = NuGetv2.RangeIntersect(vulnerabilityVersion, packageVersion, out message);
             if (!r && !string.IsNullOrEmpty(message))
             {
                 throw new Exception(message);

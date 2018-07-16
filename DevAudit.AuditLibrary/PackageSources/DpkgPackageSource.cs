@@ -80,7 +80,7 @@ namespace DevAudit.AuditLibrary
         }
 
  
-        public override bool IsVulnerabilityVersionInPackageVersionRange(string vulnerability_version, string package_version)
+        public override bool IsVulnerabilityVersionInPackageVersionRange(string vulnerabilityVersion, string packageVersion)
         {
             return true; //Vulners data source version matching done on server
         }

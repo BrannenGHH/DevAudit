@@ -188,12 +188,12 @@ namespace DevAudit.AuditLibrary
             throw new NotImplementedException();
         }
 
-        public override bool IsVulnerabilityVersionInPackageVersionRange(string vulnerability_version, string package_version)
+        public override bool IsVulnerabilityVersionInPackageVersionRange(string vulnerabilityVersion, string packageVersion)
         {
             string message = "";
-            vulnerability_version = vulnerability_version.TrimEnd(".".ToCharArray());
-            package_version = package_version.TrimEnd(".".ToCharArray());       
-            bool r = Drupal.RangeIntersect(vulnerability_version, package_version, out message);
+            vulnerabilityVersion = vulnerabilityVersion.TrimEnd(".".ToCharArray());
+            packageVersion = packageVersion.TrimEnd(".".ToCharArray());       
+            bool r = Drupal.RangeIntersect(vulnerabilityVersion, packageVersion, out message);
             if (!r && !string.IsNullOrEmpty(message))
             {
                 throw new Exception(message);

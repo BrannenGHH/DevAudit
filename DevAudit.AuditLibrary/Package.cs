@@ -28,10 +28,10 @@ namespace DevAudit.AuditLibrary
         [JsonIgnore]
         public string Architecture { get; set; }
 
-        public Package(string package_manager, string application_name, string version, string vendor = null, string group = null, string architecture = null)
+        public Package(string packageManager, string applicationName, string version, string vendor = null, string group = null, string architecture = null)
         {
-            this.PackageManager = package_manager;
-            this.Name = application_name;
+            this.PackageManager = packageManager;
+            this.Name = applicationName;
             this.Version = version;
             if (!string.IsNullOrEmpty(vendor)) this.Vendor = vendor;
             if (!string.IsNullOrEmpty(group)) this.Group = group;

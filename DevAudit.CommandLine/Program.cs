@@ -627,21 +627,22 @@ namespace DevAudit.CommandLine
             }
             if(!string.IsNullOrEmpty(ProgramOptions.AuditOptions))
             {
-                Dictionary<string, object> parsed_options = Options.Parse(ProgramOptions.AuditOptions);
-                if (parsed_options.Count == 0)
+                Dictionary<string, object> parsedOptions = Options.Parse(ProgramOptions.AuditOptions);
+                if (!parsedOptions.Any())
                 {
                     PrintErrorMessage("There was an error parsing the options string {0}.", ProgramOptions.AuditOptions);
                     return (int)Exit;
                 }                
-                else if (parsed_options.Where(o => o.Key == "_ERROR_").Count() > 0)
+                else if (parsedOptions.Where(o => o.Key == "_ERROR_").Any())
                 {
 
-                    string error_options = parsed_options.Where(o => o.Key == "_ERROR_").Select(kv => (string)kv.Value).Aggregate((s1, s2) => s1 + Environment.NewLine + s2);
-                    PrintErrorMessage("There was an error parsing the following options {0}.", error_options);
-                    parsed_options = parsed_options.Where(o => o.Key != "_ERROR_").ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                    string errorOptions = parsedOptions.Where(o => o.Key == "_ERROR_")
+                        .Select(kv => (string)kv.Value).Aggregate((s1, s2) => s1 + Environment.NewLine + s2);
+                    PrintErrorMessage("There was an error parsing the following options {0}.", errorOptions);
+                    parsedOptions = parsedOptions.Where(o => o.Key != "_ERROR_").ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
                 }
-                foreach (KeyValuePair<string, object> kvp in parsed_options)
+                foreach (KeyValuePair<string, object> kvp in parsedOptions)
                 {
                     if (audit_options.ContainsKey(kvp.Key))
                     {
@@ -1005,13 +1006,13 @@ namespace DevAudit.CommandLine
             return (int) exit;
         }
 
-        static void PrintPackageSourceAuditResults(AuditTarget.AuditResult ar, out AuditTarget.AuditResult exit)
+        private static void PrintPackageSourceAuditResults(AuditTarget.AuditResult ar, out AuditTarget.AuditResult exit)
         {
             exit = ar;
             if (Spinner != null) StopSpinner();
             if (ProgramOptions.ListPackages)
             {
-                if (ar == AuditTarget.AuditResult.SUCCESS && Source.Packages.Count() > 0)
+                if (ar == AuditTarget.AuditResult.SUCCESS && Source.Packages.Any())
                 {
                     int i = 1;
                     foreach (IPackage package in Source.Packages.OrderBy(p => p.Name))
@@ -1021,7 +1022,7 @@ namespace DevAudit.CommandLine
                     }
                     return;
                 }
-                else if (ar == AuditTarget.AuditResult.SUCCESS && Source.Packages.Count() == 0)
+                else if (ar == AuditTarget.AuditResult.SUCCESS && !Source.Packages.Any())
                 {
                     PrintMessageLine("No packages found for {0}. ", Source.PackageManagerLabel);
                     return;
@@ -1033,7 +1034,7 @@ namespace DevAudit.CommandLine
             }
             else if (ProgramOptions.ListArtifacts)
             {
-                if (ar == AuditTarget.AuditResult.SUCCESS && Source.Artifacts.Count() > 0)
+                if (ar == AuditTarget.AuditResult.SUCCESS && Source.Artifacts.Any())
                 {
                     int i = 1;
                     foreach (IArtifact artifact in Source.Artifacts.Values)
@@ -1051,7 +1052,7 @@ namespace DevAudit.CommandLine
                     }
                     return;
                 }
-                else if (ar == AuditTarget.AuditResult.SUCCESS && Source.Artifacts.Count() == 0)
+                else if (ar == AuditTarget.AuditResult.SUCCESS && !Source.Artifacts.Any())
                 {
                     PrintMessageLine("No artifacts found for {0}. ", Source.PackageManagerLabel);
                     return;
@@ -1100,7 +1101,7 @@ namespace DevAudit.CommandLine
                         PrintAuditResultMultiLineField(ConsoleColor.White, 2, "Description", v.Description.Trim().Replace("\n", "").Replace(". ", "." + Environment.NewLine));
                         PrintMessage(ConsoleColor.White, "  --Affected versions: ");
                         PrintMessageLine(ConsoleColor.Red, "{0}", string.Join(", ", v.Versions.ToArray()));
-                        if (v.CVE != null && v.CVE.Count() > 0)
+                        if (v.CVE != null && v.CVE.Any())
                         {
                             PrintMessageLine(ConsoleColor.White, "  --CVE(s): {0}", string.Join(", ", v.CVE.ToArray()));
                         }
@@ -1137,7 +1138,7 @@ namespace DevAudit.CommandLine
                 }
             }
             PrintMessageLine("");
-            if (vuln_ds.Count > 0)
+            if (vuln_ds.Any())
             {
                 PrintMessageLine("Vulnerabilities Data Providers\n==============================");
                 foreach (DataSourceInfo dsi in vuln_ds)

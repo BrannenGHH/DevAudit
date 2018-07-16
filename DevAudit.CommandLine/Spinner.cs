@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace DevAudit.CommandLine
 {
-    //Modified from http://stackoverflow.com/a/33685254
+    ///<summary> Prints a spining animation to stdout. </summary>
+    ///<remarks> Modified from http://stackoverflow.com/a/33685254 </remarks>
     public class Spinner : IDisposable
     {
-        //private const string Sequence = @"/-\|";
         #region Private fields
         private const string sequence = @"|/-\|/-\";
         private int counter = 0;
